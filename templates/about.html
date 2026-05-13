@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Tentang – Bali Mask Recognition{% endblock %}
+
+{% block content %}
+<section class="max-w-5xl mx-auto px-4 py-10" id="about-page">
+  <div class="text-center mb-10">
+    <div class="flex items-center justify-center gap-1.5 mb-4">
+      <span class="inline-block w-1.5 h-1.5 bg-gold rotate-45"></span>
+      <span class="inline-block w-1.5 h-1.5 bg-crimson rotate-45"></span>
+      <span class="inline-block w-1.5 h-1.5 bg-gold rotate-45"></span>
+    </div>
+    <h1 class="font-serif text-3xl md:text-4xl text-amber-50 mb-2">Tentang Sistem</h1>
+    <p class="text-stone-500 text-sm">Informasi teknis dan latar belakang Bali Mask Recognition</p>
+  </div>
+
+  <!-- Status Card -->
+  <div class="flex items-center gap-4 rounded-2xl p-5 mb-8 border
+    {% if model_loaded %}bg-green-900/10 border-green-600/30{% else %}bg-red-900/10 border-red-600/30{% endif %}">
+    <span class="text-3xl">{% if model_loaded %}✅{% else %}❌{% endif %}</span>
+    <div>
+      <h3 class="font-semibold text-amber-100 mb-0.5">Status Model AI</h3>
+      <p class="text-sm text-stone-400">
+        {% if model_loaded %}Model berhasil dimuat · Device: <strong class="text-amber-100">{{ device }}</strong>
+        {% else %}Model belum dimuat · Pastikan <code class="bg-white/10 px-1 rounded font-mono">best_model_FINAL.pth</code> tersedia{% endif %}
+      </p>
+    </div>
+  </div>
+
+  <!-- Info Grid -->
+  <div class="grid sm:grid-cols-2 gap-5 mb-8">
+    {% for icon, title, items in [
+      ('🧠','Teknologi AI',[('Model','SSDLite MobileNetV3 Large'),('Framework','PyTorch + TorchVision'),('Input','Gambar RGB 320×320'),('Output','Bounding box, label, confidence'),('Threshold','50% confidence minimum'),('Kelas',''+num_classes|string+' topeng')]),
+    ] %}
+    <div class="bg-dark-card border border-gold/15 rounded-2xl p-6">
+      <div class="text-3xl mb-3">{{ icon }}</div>
+      <h3 class="font-serif text-gold text-lg mb-4">{{ title }}</h3>
+      <ul class="space-y-2">
+        {% for k,v in items %}
+        <li class="text-sm text-stone-400"><span class="text-amber-100 font-medium">{{ k }}:</span> {{ v }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endfor %}
+    <div class="bg-dark-card border border-gold/15 rounded-2xl p-6">
+      <div class="text-3xl mb-3">🎭</div>
+      <h3 class="font-serif text-gold text-lg mb-4">Kelas yang Dikenali</h3>
+      <div class="flex flex-wrap gap-2">
+        {% for cn in class_names %}
+        <span class="bg-gold/10 border border-gold/20 text-gold text-xs font-semibold px-3 py-1 rounded-full">{{ cn|capitalize }}</span>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- About Culture -->
+  <div class="bg-dark-card border border-gold/15 rounded-2xl p-7 mb-6">
+    <h2 class="font-serif text-gold text-2xl mb-4">Tentang Topeng Bali</h2>
+    <div class="space-y-3 text-stone-400 text-sm leading-relaxed">
+      <p>Topeng Bali adalah seni pertunjukan tradisional yang kaya makna budaya dan nilai spiritual. Dalam pertunjukan <em class="text-gold not-italic">Topeng Pajegan</em>, seorang penari membawakan berbagai karakter menggunakan topeng yang masing-masing memiliki makna filosofis tersendiri.</p>
+      <p>Setiap topeng mencerminkan karakter manusia — dari raja agung, rakyat jelata yang jenaka, hingga pendeta yang sakral. Seni Topeng Bali telah diakui sebagai warisan budaya tak benda.</p>
+      <p>Proyek <strong class="text-amber-100">Bali Mask Recognition</strong> bertujuan membantu masyarakat mengenal kekayaan budaya Bali melalui teknologi kecerdasan buatan modern.</p>
+    </div>
+  </div>
+
+  <!-- API -->
+  <!-- <div class="bg-dark-card border border-gold/15 rounded-2xl p-6">
+    <h3 class="font-serif text-gold text-xl mb-4">API Endpoints</h3>
+    <div class="space-y-3">
+      {% for method, color, path, desc in [
+        ('GET','bg-green-900/40 text-green-300','/','Halaman Beranda'),
+        ('POST','bg-blue-900/40 text-blue-300','/predict','Upload gambar → deteksi topeng'),
+        ('POST','bg-blue-900/40 text-blue-300','/predict_camera','Frame kamera (base64) → deteksi'),
+        ('GET','bg-green-900/40 text-green-300','/api/status','Status model & sistem'),
+      ] %}
+      <div class="flex items-center gap-3 text-sm">
+        <span class="{{ color }} text-[11px] font-bold px-2.5 py-0.5 rounded-md min-w-[44px] text-center">{{ method }}</span>
+        <code class="bg-white/8 text-amber-100 px-2.5 py-0.5 rounded-md font-mono">{{ path }}</code>
+        <span class="text-stone-500">{{ desc }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div> -->
+</section>
+{% endblock %}

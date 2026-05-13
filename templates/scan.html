@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Scan Kamera – Bali Mask Recognition{% endblock %}
+
+{% block content %}
+<section class="max-w-6xl mx-auto px-4 py-10" id="scan-page">
+  <div class="text-center mb-8">
+    <div class="flex items-center justify-center gap-1.5 mb-4">
+      <span class="inline-block w-1.5 h-1.5 bg-gold rotate-45"></span>
+      <span class="inline-block w-1.5 h-1.5 bg-crimson rotate-45"></span>
+      <span class="inline-block w-1.5 h-1.5 bg-gold rotate-45"></span>
+    </div>
+    <h1 class="font-serif text-3xl md:text-4xl text-amber-50 mb-2">Scan Kamera</h1>
+    <p class="text-stone-500 text-sm">Arahkan kamera ke topeng Bali untuk deteksi</p>
+  </div>
+
+  {% if not model_loaded %}
+  <div class="bg-yellow-900/20 border border-yellow-600/40 text-yellow-300 rounded-xl px-5 py-4 mb-6 text-sm">
+    ⚠️ <strong>Model AI belum siap.</strong>
+  </div>
+  {% endif %}
+
+  <div class="grid lg:grid-cols-2 gap-6 items-start">
+    <!-- Camera Panel -->
+    <div class="bg-dark-card border border-gold/20 rounded-2xl p-6 flex flex-col gap-4">
+      <div id="cameraWrap" class="relative bg-black rounded-xl overflow-hidden min-h-[300px] flex items-center justify-center">
+        <div id="cameraPlaceholder" class="text-center p-10 text-stone-500">
+          <div class="text-5xl mb-4">📷</div>
+          <p class="mb-5 text-sm">Kamera belum aktif</p>
+          <button id="btnStartCamera" class="gold-gradient text-dark font-bold px-6 py-3 rounded-full hover:shadow-[0_4px_20px_rgba(212,175,55,.4)] transition-all">
+            Aktifkan Kamera
+          </button>
+        </div>
+        <video id="cameraFeed" autoplay playsinline muted class="hidden w-full max-h-[400px] object-cover"></video>
+        <canvas id="cameraCanvas" class="hidden"></canvas>
+        <!-- scan overlay -->
+        <div id="scanOverlay" class="hidden absolute inset-0 pointer-events-none">
+          <div class="absolute left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-transparent via-gold to-transparent animate-scanLine" style="top:50%"></div>
+          <div class="absolute top-2 left-2 w-6 h-6 scan-corner-tl"></div>
+          <div class="absolute top-2 right-2 w-6 h-6 scan-corner-tr"></div>
+          <div class="absolute bottom-2 left-2 w-6 h-6 scan-corner-bl"></div>
+          <div class="absolute bottom-2 right-2 w-6 h-6 scan-corner-br"></div>
+        </div>
+      </div>
+      <div id="cameraControls" class="hidden flex gap-3">
+        <button id="btnCapture" class="flex-1 gold-gradient text-dark font-bold py-3.5 rounded-xl hover:shadow-[0_4px_20px_rgba(212,175,55,.4)] transition-all">
+          📸 Ambil & Analisis
+        </button>
+        <button id="btnStopCamera" class="flex-1 bg-crimson text-white font-bold py-3.5 rounded-xl hover:bg-red-800 transition-all">
+          ■ Stop
+        </button>
+      </div>
+    </div>
+
+    <!-- Scan Result -->
+    <div class="bg-dark-card border border-gold/20 rounded-2xl p-6 flex flex-col gap-4 min-h-[300px]">
+      <div id="scanResultPlaceholder" class="flex flex-col items-center justify-center h-full py-10 text-center text-stone-500">
+        <div class="text-5xl mb-4 opacity-40">🎭</div>
+        <p class="text-sm">Aktifkan kamera dan ambil gambar untuk melihat hasil.</p>
+      </div>
+      <div id="scanResultContent" class="hidden flex-col gap-4">
+        <div class="rounded-xl overflow-hidden bg-black">
+          <img id="scanResultImg" src="" alt="Hasil Scan" class="w-full max-h-80 object-contain">
+        </div>
+        <div id="scanResultInfo" class="flex flex-col gap-3"></div>
+        <div class="flex justify-end">
+          <button id="btnScanAgain" class="border border-gold/40 text-gold text-sm font-semibold px-5 py-2 rounded-full hover:bg-gold/10 transition-all">↩ Scan Lagi</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block extra_scripts %}<script src="{{ url_for('static', filename='js/scan.js') }}"></script>{% endblock %}

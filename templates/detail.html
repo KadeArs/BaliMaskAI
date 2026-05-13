@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}Detail {{ mask_info.nama }} – Bali Mask Recognition{% endblock %}
+
+{% block content %}
+<section class="max-w-4xl mx-auto px-4 py-10" id="detail-page">
+
+  <!-- Breadcrumb -->
+  <nav class="flex items-center gap-2 text-xs text-stone-500 mb-6">
+    <a href="/" class="hover:text-gold transition-colors">Beranda</a>
+    <span>›</span>
+    <span class="text-stone-400 capitalize">{{ mask_name }}</span>
+  </nav>
+
+  <!-- Header -->
+  <div class="text-center mb-10">
+    <div class="flex items-center justify-center gap-1.5 mb-4">
+      <span class="inline-block w-1.5 h-1.5 bg-gold rotate-45"></span>
+      <span class="inline-block w-1.5 h-1.5 bg-crimson rotate-45"></span>
+      <span class="inline-block w-1.5 h-1.5 bg-gold rotate-45"></span>
+    </div>
+    <h1 class="font-serif text-3xl md:text-4xl text-amber-50 mb-2 capitalize">{{ mask_info.nama }}</h1>
+    <p class="text-stone-500 text-sm">Topeng Tradisional Bali</p>
+  </div>
+
+  <!-- Card Utama: Gambar + Deskripsi Singkat -->
+  <div class="bg-dark-card border border-gold/20 rounded-2xl overflow-hidden mb-8 animate-fadeIn">
+    <div class="md:flex">
+      <!-- Gambar Topeng -->
+      <div class="md:w-2/5 bg-black flex items-center justify-center min-h-[280px] relative">
+        <img
+          src="{{ url_for('mask_image', mask_name=mask_name) }}"
+          alt="Gambar {{ mask_info.nama }}"
+          id="mask-hero-img"
+          class="w-full h-full object-cover max-h-[420px] md:max-h-full"
+          onerror="this.style.display='none'; document.getElementById('mask-img-placeholder').style.display='flex';"
+        >
+        <div id="mask-img-placeholder"
+             class="hidden absolute inset-0 flex-col items-center justify-center text-stone-600 gap-3">
+          <span class="text-6xl">🎭</span>
+          <span class="text-sm">Gambar tidak tersedia</span>
+        </div>
+      </div>
+
+      <!-- Deskripsi Singkat -->
+      <div class="md:w-3/5 p-6 md:p-8 flex flex-col justify-center">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="w-1 h-6 bg-gold rounded-full"></span>
+          <h2 class="font-serif text-gold text-xl">Deskripsi Singkat</h2>
+        </div>
+
+        <!-- Render deskripsi singkat (diisi oleh JS) -->
+        <div id="desc-singkat" class="mask-detail-content text-stone-300 text-sm leading-relaxed space-y-2">
+          <!-- diisi oleh renderMarkdown(RAW_SINGKAT) -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card Detail: Deskripsi Detail -->
+  <div class="bg-dark-card border border-gold/20 rounded-2xl p-6 md:p-8 mb-8 animate-fadeIn" style="animation-delay:.15s">
+    <div class="flex items-center gap-2 mb-6">
+      <span class="w-1 h-6 bg-crimson rounded-full"></span>
+      <h2 class="font-serif text-gold text-xl">Deskripsi Detail</h2>
+    </div>
+    <div id="desc-detail" class="mask-detail-content text-stone-300 text-sm leading-relaxed">
+      <!-- diisi oleh JS dari data raw -->
+    </div>
+  </div>
+
+  <!-- Tombol Kembali -->
+  <div class="flex justify-center gap-4 mt-4">
+    <a href="javascript:history.back()"
+       class="border border-gold/40 text-gold text-sm font-semibold px-6 py-2.5 rounded-full hover:bg-gold/10 transition-all">
+      ← Kembali
+    </a>
+    <a href="/scan"
+       class="gold-gradient text-dark text-sm font-bold px-6 py-2.5 rounded-full hover:shadow-[0_4px_20px_rgba(212,175,55,.4)] transition-all">
+      📷 Scan Topeng
+    </a>
+  </div>
+</section>
+
+<!-- Raw data untuk JS -->
+<script>
+  const RAW_DETAIL  = {{ mask_info.dekripsi_detail | tojson }};
+  const RAW_SINGKAT = {{ mask_info.dekripsi_singkat | tojson }};
+</script>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+/* ---- Helper: render markdown-like teks ---- */
+/* ## = Bab (heading utama), # = Sub Bab (heading sekunder)          */
+/* Keduanya ditangani secara inline maupun di awal baris.            */
+function renderMarkdown(raw) {
+  if (!raw) return '';
+
+  let html = raw
+    /* ── ## Bab: heading utama – gold, bergaris bawah ── */
+    .replace(/##\s+([^#\n]+)/g,
+      '</p>'
+      + '<h2 class="font-serif text-gold text-lg font-bold mt-6 mb-2 pb-1 border-b border-gold/40 tracking-wide">'
+      + '$1'
+      + '</h2>'
+      + '<p class="mb-3">')
+
+    /* ── # Sub Bab: heading sekunder – amber, border kiri ──         */
+    /* (setelah ## sudah diganti, '#' yang tersisa adalah sub-bab)   */
+    .replace(/#\s+([^#\n]+)/g,
+      '</p>'
+      + '<h3 class="font-serif text-amber-200 text-sm font-semibold mt-4 mb-1 border-l-2 border-gold/60 pl-2">'
+      + '$1'
+      + '</h3>'
+      + '<p class="mb-3">')
+
+    /* ── Pemisah antar-paragraf ── */
+    .replace(/\n{2,}/g, '</p><p class="mb-3">')
+    .replace(/\n/g, ' ');
+
+  return '<p class="mb-3">' + html + '</p>';
+}
+
+/* Render deskripsi singkat */
+(function () {
+  const el = document.getElementById('desc-singkat');
+  if (el && RAW_SINGKAT) {
+    el.innerHTML = renderMarkdown(RAW_SINGKAT);
+  }
+})();
+
+/* Render deskripsi detail */
+(function () {
+  const el = document.getElementById('desc-detail');
+  if (el && RAW_DETAIL) {
+    el.innerHTML = renderMarkdown(RAW_DETAIL);
+  }
+})();
+</script>
+{% endblock %}

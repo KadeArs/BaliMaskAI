@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Bali Mask Recognition{% endblock %}</title>
+  <meta name="description" content="{% block meta_desc %}Kenali Topeng Bali dengan AI{% endblock %}">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.png') }}">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gold: { DEFAULT: '#D4AF37', light: '#F0D060', dark: '#A0800A' },
+            dark: { DEFAULT: '#0d0a07', card: '#1a1208', card2: '#221a0e' },
+            crimson: '#8B1A1A'
+          },
+          fontFamily: {
+            serif: ['"Playfair Display"', 'Georgia', 'serif'],
+            sans: ['Inter', 'system-ui', 'sans-serif']
+          },
+          keyframes: {
+            bounce2: { '0%,100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(8px)' } },
+            scanLine: { '0%,100%': { top: '20%' }, '50%': { top: '80%' } },
+            spin: { to: { transform: 'rotate(360deg)' } },
+            fadeIn: { from: { opacity: '0', transform: 'translateY(16px)' }, to: { opacity: '1', transform: 'translateY(0)' } }
+          },
+          animation: {
+            bounce2: 'bounce2 2s ease-in-out infinite',
+            scanLine: 'scanLine 2.5s ease-in-out infinite',
+            spin: 'spin .7s linear infinite',
+            fadeIn: 'fadeIn .4s ease forwards'
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+  <style>
+    body {
+      background: #0d0a07;
+    }
+
+    .bg-pattern {
+      background-image: radial-gradient(circle at 20% 50%, rgba(139, 26, 26, .3) 0%, transparent 60%), radial-gradient(circle at 80% 30%, rgba(212, 175, 55, .12) 0%, transparent 50%);
+    }
+
+    .gold-gradient {
+      background: linear-gradient(135deg, #D4AF37, #c9920a);
+    }
+
+    .gold-text {
+      background: linear-gradient(135deg, #F0D060, #D4AF37);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .glass {
+      background: rgba(26, 18, 8, .85);
+      backdrop-filter: blur(12px);
+    }
+
+    .conf-bar {
+      transition: width 1.2s ease;
+    }
+
+    .scan-corner-tl {
+      border-top: 3px solid #D4AF37;
+      border-left: 3px solid #D4AF37;
+    }
+
+    .scan-corner-tr {
+      border-top: 3px solid #D4AF37;
+      border-right: 3px solid #D4AF37;
+    }
+
+    .scan-corner-bl {
+      border-bottom: 3px solid #D4AF37;
+      border-left: 3px solid #D4AF37;
+    }
+
+    .scan-corner-br {
+      border-bottom: 3px solid #D4AF37;
+      border-right: 3px solid #D4AF37;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding-bottom: 64px;
+      }
+    }
+
+    /* Detail page rich text */
+    .mask-detail-content h3 {
+      color: #f5e6a0;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1rem;
+      font-weight: 600;
+      margin-top: 1.25rem;
+      margin-bottom: 0.4rem;
+      border-left: 3px solid #D4AF37;
+      padding-left: .6rem;
+    }
+    .mask-detail-content h4 {
+      color: #c9a02a;
+      font-size: .82rem;
+      font-weight: 600;
+      margin-top: 1rem;
+      margin-bottom: .2rem;
+    }
+    .mask-detail-content p {
+      color: #a8a29e;
+      font-size: .85rem;
+      line-height: 1.75;
+      margin-bottom: .6rem;
+    }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+
+<body class="text-amber-50 font-sans min-h-screen">
+
+  <!-- ── NAVBAR ── -->
+  <nav class="fixed top-0 inset-x-0 z-50 glass border-b border-gold/20 h-16">
+    <div class="max-w-6xl mx-auto px-4 h-full flex items-center gap-6">
+      <a href="{{ url_for('home') }}" class="flex items-center gap-2 font-serif text-xl font-bold shrink-0">
+        <img src="{{ url_for('static', filename='images/logo_topeng.png') }}" alt="Bali Mask Logo"
+          class="w-12 h-12 object-contain rounded-full">
+        <span>Bali Mask<span class="text-gold">AI</span></span>
+      </a>
+      <ul class="hidden md:flex items-center gap-1 ml-auto">
+        {% set links = [('home','Beranda'),('scan','Scan'),('upload','Upload'),('about','Tentang')] %}
+        {% for ep, label in links %}
+        <li><a href="{{ url_for(ep) }}"
+            class="px-3 py-2 rounded-lg text-sm font-medium transition-all
+          {% if request.endpoint == ep %}text-gold bg-gold/10{% else %}text-stone-400 hover:text-gold hover:bg-gold/10{% endif %}">{{ label }}</a>
+        </li>
+        {% endfor %}
+      </ul>
+      <div class="hidden md:flex items-center gap-2 text-xs text-stone-500 ml-2">
+        <span
+          class="w-2 h-2 rounded-full {% if model_loaded %}bg-green-400 shadow-[0_0_8px_#4CAF50]{% else %}bg-red-500{% endif %}"></span>
+        AI {% if model_loaded %}Ready{% else %}Offline{% endif %}
+      </div>
+      <button id="hamburger" class="md:hidden ml-auto flex flex-col gap-1.5 p-2" aria-label="Menu">
+        <span class="block w-5 h-0.5 bg-gold rounded transition-all"></span>
+        <span class="block w-5 h-0.5 bg-gold rounded transition-all"></span>
+        <span class="block w-5 h-0.5 bg-gold rounded transition-all"></span>
+      </button>
+    </div>
+    <!-- mobile dropdown -->
+    <div id="mobileMenu" class="hidden flex-col glass border-t border-gold/20 px-4 pb-3 md:hidden">
+      {% for ep, label in links %}
+      <a href="{{ url_for(ep) }}" class="py-3 text-sm border-b border-gold/10 last:border-0
+       {% if request.endpoint == ep %}text-gold{% else %}text-stone-400{% endif %}">{{ label }}</a>
+      {% endfor %}
+    </div>
+  </nav>
+
+  <!-- ── CONTENT ── -->
+  <main class="pt-16">{% block content %}{% endblock %}</main>
+
+  <!-- ── BOTTOM NAV (mobile) ── -->
+  <nav class="md:hidden fixed bottom-0 inset-x-0 z-50 glass border-t border-gold/20 h-16 flex">
+    {% set bnav = [
+    ('home','Beranda','M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0
+    001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z'),
+    ('scan','Scan','M3 4a1 1 0 011-1h4a1 1 0 010 2H6.414l2.293 2.293a1 1 0 01-1.414 1.414L5 6.414V8a1 1 0 01-2 0V4zm14
+    0a1 1 0 011 1v4a1 1 0 01-2 0V6.414l-2.293 2.293a1 1 0 11-1.414-1.414L14.586 5H13a1 1 0 010-2h4zm-9 9a1 1 0 011-1h4a1
+    1 0 010 2H9.414l2.293 2.293a1 1 0 01-1.414 1.414L8 15.414V17a1 1 0 01-2 0v-4zm10 0a1 1 0 011 1v4a1 1 0 01-2
+    0v-1.586l-2.293 2.293a1 1 0 01-1.414-1.414L15.586 15H14a1 1 0 010-2h4z'),
+    ('upload','Upload','M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414
+    0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z'),
+    ('about','Tentang','M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001
+    1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z')
+    ] %}
+    {% for ep, label, path in bnav %}
+    <a href="{{ url_for(ep) }}" class="flex flex-col items-center justify-center flex-1 gap-1 text-[10px] transition-colors
+     {% if request.endpoint == ep %}text-gold{% else %}text-stone-500{% endif %}">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="{{ path }}" clip-rule="evenodd" />
+      </svg>
+      {{ label }}
+    </a>
+    {% endfor %}
+  </nav>
+
+  <!-- ── TOAST ── -->
+  <div id="toast" class="fixed bottom-20 left-1/2 -translate-x-1/2 translate-y-4 opacity-0 pointer-events-none transition-all duration-300 z-[9999]
+  bg-dark-card border border-gold/30 text-amber-100 rounded-xl px-5 py-3 text-sm whitespace-nowrap"></div>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+
+</html>

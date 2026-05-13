@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}Bali Mask Recognition – Beranda{% endblock %}
+
+{% block content %}
+<!-- HERO -->
+<section
+  class="relative min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center text-center px-5 py-20 overflow-hidden bg-pattern">
+  <!-- glows -->
+  <div class="absolute -top-32 -left-32 w-96 h-96 bg-crimson/30 rounded-full blur-[100px] pointer-events-none"></div>
+  <div class="absolute -bottom-20 -right-20 w-80 h-80 bg-gold/15 rounded-full blur-[80px] pointer-events-none"></div>
+
+  <div class="relative z-10 max-w-2xl w-full">
+    <!-- ornamen -->
+    <div class="flex items-center justify-center gap-2 mb-5">
+      <span class="inline-block w-2 h-2 bg-gold rotate-45"></span>
+      <span class="inline-block w-3 h-3 bg-crimson rotate-45"></span>
+      <span class="inline-block w-2 h-2 bg-gold rotate-45"></span>
+    </div>
+
+    <p class="text-[11px] tracking-[.28em] text-gold font-semibold mb-4 uppercase">Warisan Budaya Bali</p>
+
+    <h1 class="font-serif mb-6 leading-tight">
+      <span class="block text-[clamp(2.8rem,8vw,5rem)] font-bold text-amber-50">Bali Mask</span>
+      <span class="block text-[clamp(2.6rem,8vw,5rem)] font-normal italic text-gold">Recognition</span>
+    </h1>
+
+    <p class="text-stone-400 text-base md:text-lg leading-relaxed mb-10 max-w-xl mx-auto">
+      Kenali jenis Topeng Bali dengan kecerdasan buatan.<br class="hidden md:block">
+      Scan langsung dari kamera atau unggah gambar<br class="hidden md:block">
+      untuk mengungkap makna di balik setiap ekspresi.
+    </p>
+
+    <div class="flex flex-col sm:flex-row gap-3 justify-center mb-14">
+      <a href="{{ url_for('scan') }}" id="btn-mulai-scan"
+        class="gold-gradient text-dark font-bold px-7 py-4 rounded-full flex items-center justify-center gap-2.5 shadow-[0_4px_20px_rgba(212,175,55,.4)] hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(212,175,55,.55)] transition-all">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path
+            d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zm12.553 1.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
+        </svg>
+        Mulai Scan
+      </a>
+      <a href="{{ url_for('upload') }}" id="btn-upload-gambar"
+        class="bg-transparent border-2 border-gold/50 text-gold font-bold px-7 py-4 rounded-full flex items-center justify-center gap-2.5 hover:border-gold hover:bg-gold/10 hover:-translate-y-1 transition-all">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd"
+            d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z"
+            clip-rule="evenodd" />
+        </svg>
+        Upload Gambar
+      </a>
+    </div>
+
+    <!-- Stats -->
+    <div class="flex items-center justify-center">
+      <div class="text-center px-6 md:px-10">
+        <span class="block font-serif text-3xl font-bold text-gold">8+</span>
+        <span class="text-[11px] uppercase tracking-wider text-stone-500">Jenis Topeng</span>
+      </div>
+      <div class="w-px h-12 bg-gold/20"></div>
+      <!-- <div class="text-center px-6 md:px-10">
+        <span class="block font-serif text-3xl font-bold text-gold">95%</span>
+        <span class="text-[11px] uppercase tracking-wider text-stone-500">Akurasi AI</span>
+      </div> -->
+      <div class="w-px h-12 bg-gold/20"></div>
+      <div class="text-center px-6 md:px-10">
+        <span class="block font-serif text-3xl font-bold text-gold">&lt;1s</span>
+        <span class="text-[11px] uppercase tracking-wider text-stone-500">Waktu Prediksi</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="absolute bottom-5 left-1/2 -translate-x-1/2 text-stone-600 animate-bounce2">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path d="M7 13l5 5 5-5M7 7l5 5 5-5" />
+    </svg>
+  </div>
+</section>
+
+
+
+<!-- HOW IT WORKS -->
+<section class="py-16 px-4 bg-dark-card/60">
+  <div class="max-w-5xl mx-auto">
+    <div class="text-center mb-10">
+      <h2 class="font-serif text-3xl md:text-4xl text-amber-50 mb-2">Cara Menggunakan</h2>
+      <p class="text-stone-500 text-sm">Tiga langkah mudah untuk mendeteksi topeng Bali</p>
+    </div>
+    <div class="flex flex-col md:flex-row items-center gap-4">
+      {% for num, icon, title, desc in [
+      ('1','📷','Ambil / Unggah','Foto topeng Bali menggunakan kamera atau unggah dari galeri Anda.'),
+      ('2','🤖','Analisis AI','Model AI menganalisis gambar dan mendeteksi jenis topeng secara real-time.'),
+      ('3','✨','Hasil & Info','Lihat jenis topeng, bounding box, confidence score, dan penjelasan budaya.')
+      ] %}
+      <div id="step-{{ num }}" class="flex-1 bg-dark border border-gold/15 rounded-2xl p-8 text-center relative">
+        <div
+          class="absolute -top-3.5 left-1/2 -translate-x-1/2 w-7 h-7 gold-gradient rounded-full flex items-center justify-center text-dark text-xs font-bold">
+          {{ num }}</div>
+        <div class="text-4xl mb-3">{{ icon }}</div>
+        <h3 class="font-serif text-amber-100 text-lg mb-2">{{ title }}</h3>
+        <p class="text-stone-500 text-sm leading-relaxed">{{ desc }}</p>
+      </div>
+      {% if not loop.last %}<div class="text-gold/50 text-2xl md:rotate-0 rotate-90 hidden md:block">→</div>{% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="py-16 px-4">
+  <div class="max-w-2xl mx-auto text-center">
+    <div class="bg-gradient-to-br from-dark-card to-crimson/10 border border-gold/20 rounded-3xl p-12">
+      <h2 class="font-serif text-3xl md:text-4xl text-amber-50 mb-3">Siap Mencoba?</h2>
+      <p class="text-stone-500 mb-8">Mulai kenali Topeng Bali sekarang menggunakan AI kami.</p>
+      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <a href="{{ url_for('scan') }}" id="cta-scan"
+          class="gold-gradient text-dark font-bold px-7 py-3.5 rounded-full hover:-translate-y-1 transition-all">📷 Scan
+          dengan Kamera</a>
+        <a href="{{ url_for('upload') }}" id="cta-upload"
+          class="border border-gold/40 text-gold font-bold px-7 py-3.5 rounded-full hover:bg-gold/10 transition-all">📤
+          Upload Gambar</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
