@@ -42,10 +42,25 @@ function stopCamera() {
 
 async function captureAndAnalyze() {
   if (!stream) return;
-  canvas.width  = video.videoWidth;
-  canvas.height = video.videoHeight;
-  canvas.getContext('2d').drawImage(video, 0, 0);
-  const b64 = canvas.toDataURL('image/jpeg', 0.9);
+  
+  // Batasi resolusi tangkapan kamera maksimal 1280px untuk menjaga ukuran data URL base64 tetap kecil (< 2MB)
+  let width = video.videoWidth;
+  let height = video.videoHeight;
+  const maxDim = 1280;
+  if (width > maxDim || height > maxDim) {
+    if (width > height) {
+      height = Math.round((height * maxDim) / width);
+      width = maxDim;
+    } else {
+      width = Math.round((width * maxDim) / height);
+      height = maxDim;
+    }
+  }
+
+  canvas.width  = width;
+  canvas.height = height;
+  canvas.getContext('2d').drawImage(video, 0, 0, width, height);
+  const b64 = canvas.toDataURL('image/jpeg', 0.85);
 
   btnCapture.disabled = true;
   btnCapture.textContent = '⏳ Menganalisis…';

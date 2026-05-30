@@ -112,3 +112,120 @@ function renderDetections(data, imgEl, infoEl, badgeEl) {
   meta.textContent = `\u23f1 ${data.inference_time}ms \u00b7 ${data.image_size[0]}\u00d7${data.image_size[1]}px \u00b7 ${data.device}`;
   infoEl.appendChild(meta);
 }
+
+/**
+ * Kompres gambar menggunakan HTML5 Canvas agar ukurannya di bawah targetSize (default 1.8MB).
+ * Mengembalikan Promise yang menghasilkan Blob (JPEG).
+ */
+function compressImage(file, options = {}) {
+  const {
+    maxWidth = 1600,
+    maxHeight = 1600,
+    quality = 0.8,
+    targetSize = 1.8 * 1024 * 1024 // 1.8 MB
+  } = options;
+
+  return new Promise((resolve, reject) => {
+    if (!file.type || !file.type.startsWith('image/')) {
+      reject(new Error('File yang dipilih bukan gambar.'));
+      return;
+    }
+
+    // Jika ukuran file sudah di bawah 2MB, lewatkan kompresi (kembalikan file asli)
+    if (file.size < 2 * 1024 * 1024) {
+      resolve(file);
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          let width = img.width;
+          let height = img.height;
+
+          // Hitung dimensi baru jika melebihi batas maksimum
+          if (width > maxWidth || height > maxHeight) {
+            if (width > height) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            } else {
+              width = Math.round((width * maxHeight) / height);
+              height = maxHeight;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            reject(new Error('Gagal memuat context 2D canvas.'));
+            return;
+          }
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Kompresi secara iteratif jika ukuran file masih di atas targetSize
+          function tryCompress(currentQuality, currentScale = 1.0) {
+            try {
+              if (currentScale < 0.3) {
+                // Batas minimal resolusi, kembalikan blob dengan kualitas rendah
+                canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.1);
+                return;
+              }
+
+              let w = Math.round(width * currentScale);
+              let h = Math.round(height * currentScale);
+
+              let targetCanvas = canvas;
+              if (currentScale < 1.0) {
+                targetCanvas = document.createElement('canvas');
+                targetCanvas.width = w;
+                targetCanvas.height = h;
+                const tCtx = targetCanvas.getContext('2d');
+                if (!tCtx) {
+                  reject(new Error('Gagal memuat context 2D canvas.'));
+                  return;
+                }
+                tCtx.drawImage(canvas, 0, 0, w, h);
+              }
+
+              targetCanvas.toBlob((blob) => {
+                try {
+                  if (!blob) {
+                    reject(new Error('Gagal mengompresi gambar.'));
+                    return;
+                  }
+
+                  if (blob.size > targetSize && currentQuality > 0.25) {
+                    // Coba turunkan kualitas terlebih dahulu
+                    tryCompress(currentQuality - 0.15, currentScale);
+                  } else if (blob.size > targetSize && currentScale > 0.4) {
+                    // Jika kualitas sudah rendah tapi masih kebesaran, perkecil resolusi
+                    tryCompress(0.7, currentScale - 0.2);
+                  } else {
+                    resolve(blob);
+                  }
+                } catch (err) {
+                  reject(err);
+                }
+              }, 'image/jpeg', currentQuality);
+            } catch (err) {
+              reject(err);
+            }
+          }
+
+          tryCompress(quality);
+        } catch (err) {
+          reject(err);
+        }
+      };
+      img.onerror = () => reject(new Error('Gagal memuat gambar.'));
+      img.src = event.target.result;
+    };
+    reader.onerror = () => reject(new Error('Gagal membaca file gambar.'));
+    reader.readAsDataURL(file);
+  });
+}
+

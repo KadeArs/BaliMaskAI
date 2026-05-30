@@ -34,6 +34,13 @@
           <button id="btnRemoveImg" class="absolute top-2 right-2 bg-black/70 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm hover:bg-black transition">✕</button>
         </div>
       </div>
+
+      <!-- Compression Info -->
+      <div id="compressionInfo" class="hidden text-xs bg-gold/10 border border-gold/20 text-gold/90 rounded-xl p-3 justify-between items-center animate-fadeIn">
+        <span>Ukuran: <strong id="origSize">0 KB</strong> → <strong id="compSize">0 KB</strong></span>
+        <span class="bg-gold/20 text-gold px-2 py-0.5 rounded-full font-semibold text-[10px]" id="compRatio">-0%</span>
+      </div>
+
       <input type="file" id="fileInput" accept=".png,.jpg,.jpeg,.webp,.bmp" class="hidden">
 
       <button id="btnAnalyze" disabled
